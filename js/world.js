@@ -46,6 +46,9 @@ define(['constants', 'util', 'jquery'], function(CONSTANTS, Util, $) {
       return !!this.beepers[Util.positionString(position)];
     },
     setWall : function(pos, dir, st) {
+      if (typeof dir === 'string') {
+        dir = CONSTANTS.DIRECTIONS[dir.toUpperCase()];
+      }
       if (Util.isIn(pos.x, this.range.x) && Util.isIn(pos.y, this.range.y)) {
         var self = this;
         var positions = [Util.positionString(pos, dir.key)]

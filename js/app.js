@@ -17,8 +17,11 @@ require(['constants', 'jquery', 'robot', 'world', 'render'], function(CONSTANTS,
   });
 
   var karel = window.karel = new App($('body'));
-  for (var i = 2; i < 10; i++) {
-    karel.world.setWall({x:i, y:2}, CONSTANTS.DIRECTIONS.UP, true);
+  for (var i = 0; i < 100; i++) {
+    karel.world.setWall({
+      x : Math.floor(Math.random() * karel.world.range.x[1]),
+      y : Math.floor(Math.random() * karel.world.range.y[1])
+    }, CONSTANTS.DIRECTIONS.MAP[Math.floor(Math.random() * 4)], true);
   }
   karel.ready();
 });
