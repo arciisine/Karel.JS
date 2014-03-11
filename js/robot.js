@@ -2,35 +2,22 @@
  * Robot Class
  */
 define(['constants', 'util', 'jquery'], function(CONSTANTS, Util, $) {
-  function Robot($bot) {
+  function Robot(world, $bot) {
     var self = this;
+    this.world = world;
     this.$node = $bot;
-    this.$node.data().robot = this;
-    this.position = {x:0,y:0};
+    this.position = {x:0,y:0,angle:0};
     this.orientation = CONSTANTS.DIRECTIONS.UP;
     this.beepers = 0;
-    this.angle = 0;
   }
 
   $.extend(Robot.prototype, {
-    getWorld : function() {
-      return this.$node.parents('.world').data().world;
-    },
-    render : function() {
-      this.$node.trigger('render', [
-        'moveAndRotate',
-        {
-          node : this.$node,
-          x:this.position.x,
-          y:this.position.y,
-          angle:this.angle
-        }
-      ]);
-    },
     setPosition : function(x, y) {
       this.position.x = x;
       this.position.y = y;
-      this.render();
+      this.$node.trigger('robot-move', [$.extend({}, this.position, {
+        node : this.$node
+      })]);
     },
     turnLeft : function() {
       var k = (this.orientation.key - 1);
@@ -41,11 +28,13 @@ define(['constants', 'util', 'jquery'], function(CONSTANTS, Util, $) {
       }
       this.orientation = CONSTANTS.DIRECTIONS.MAP[k];
 
-      this.angle -= 90;
-      this.render();
+      this.position.angle -= 90;
+      this.$node.trigger('robot-rotate', [$.extend({}, this.position, {
+        node : this.$node
+      })]);
     },
     isBlocked : function() {
-      return this.getWorld().hasWall(this.position.x, this.position.y, this.orientation);
+      return this.world.hasWall(this.position.x, this.position.y, this.orientation);
     },
     move : function() {
       var moving = !this.isBlocked();
@@ -56,23 +45,22 @@ define(['constants', 'util', 'jquery'], function(CONSTANTS, Util, $) {
         this.setPosition(
           this.position.x + (axis === 'x' ? delta : 0),
           this.position.y + (axis === 'y' ? delta : 0));
+
+      } else {
+        this.$node.trigger('robot-blocked', [this]);
       }
 
       return moving;
     },
     pickupBeeper : function() {
-      if (this.getWorld().getBeeper(this.toPositionString())) {
+      if (this.world.takeBeeper(this.position.x, this.position.y)) {
         Util.change(this, 'beepers', 1);
       }
     },
     dropBeeper : function() {
       if (Util.change(this, 'beepers', -1)) {
-        this.getWorld().putBeeper(this.toPositionString());
+        this.world.putBeeper(this.position.x, this.position.y);
       }
-    },
-    toPositionString : function(dir) {
-      var p = this.position;
-      return Util.positionString(p.x, p.y, dir ? this.orientation.key : undefined);
     }
   });
 

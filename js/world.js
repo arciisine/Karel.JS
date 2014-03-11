@@ -22,32 +22,21 @@ define(['constants', 'util', 'jquery'], function(CONSTANTS, Util, $) {
   };
 
   $.extend(World.prototype, {
-    render : function() {
-      this.$canvas.empty();
+    updateBeeper : function(x, y, delta) {
+      var pos = Util.positionString(x,y);
+      Util.toDefault(this.beepers, pos, 0);
+      var res = Util.change(this.beepers, pos, delta);
 
-      var ry = this.range.y[1];
-      var rx = this.range.x[1];
-
-      for (var y = 0; y < ry; y++) {
-        var $row = $('<div/>').addClass('row');
-        for (var x = 0; x < rx; x++) {
-          var $cell = $('<div/>').addClass('cell');
-          for (var k in CONSTANTS.DIRECTIONS) {
-            var dir = CONSTANTS.DIRECTIONS[k];
-            if (this.hasWall(x, y, dir)) {
-              $cell.addClass('wall-'+dir.name);
-            }
-          }
-          $row.append($cell);
-        }
-        this.$canvas.append($row);
+      if (res) {
+        this.$node.trigger('beeper-updated', [{
+          x : x,
+          y : y,
+          count : this.beepers[position]
+        }]);
       }
+      return res;
     },
-    updateBeeper : function(position, delta) {
-      Util.toDefault(this.beepers, position, 0);
-      return Util.change(this.beepers, position, delta);
-    },
-    getBeeper : function(position) {
+    takeBeeper : function(position) {
       return this.updateBeeper(position, -1);
     },
     putBeeper : function(position) {

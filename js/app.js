@@ -2,24 +2,23 @@ require(['constants', 'jquery', 'robot', 'world', 'render'], function(CONSTANTS,
   /**
    * App Class
    */
-  function App($world) {
-    this.robot = null;
-    this.world = null;
+  function App($root) {
+    this.$root = $root;
+    this.world = new World($root.find('.world'));
+    this.robot = new Robot(this.world, $root.find('.robot'));
+    this.$canvas = $root.find('.canvas');;
+    this.$root.on('robot-move robot-rotate robot-blocked beeper-updated', Render.process);
   }
 
   $.extend(App.prototype, {
-
-  });
-
-  $('.world').on('render', Render.receive);
-
-  $(function() {
-    var w = new World($('.world'));
-    for (var i = 2; i < 10; i++) {
-      w.setWall(i, 2, CONSTANTS.DIRECTIONS.UP, true);
+    ready : function() {
+      Render.drawWorld(this.$canvas, this.world);
     }
-    w.render();
-    var r = new Robot($('.robot'));
-    window.robot = r;
   });
+
+  var karel = window.karel = new App($('body'));
+  for (var i = 2; i < 10; i++) {
+    karel.world.setWall(i, 2, CONSTANTS.DIRECTIONS.UP, true);
+  }
+  karel.ready();
 });
