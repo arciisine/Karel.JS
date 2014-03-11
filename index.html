@@ -1,31 +1,20 @@
 <!DOCTYPE html>
 <html>
   <head>
-    <link rel="stylesheet" href="css/app.css">
-    <script src="bower_components/jquery/dist/jquery.min.js"></script>
-    <script src="js/app.js"></script>
-    <script>
-      $(function() {
-        var w = new World($('.world'));
-        for (var i = 2; i < 10; i++) {
-          w.setWall(i, 2, CONSTANTS.DIRECTIONS.UP, true);
-        }
-        w.render();
-        var r = new Robot($('.robot'));
-        window.robot = r;
-      });
-    </script>
+    <link rel="stylesheet/less" href="less/app.less">
+    <script data-main="js/main.js" src="bower_components/requirejs/require.js"></script>
+    <script src="bower_components/less/dist/less-1.7.0.min.js"></script>
   </head>
   <body>
     <div class="container">
-      <div class="header component">
+      <div class="header">
         <h1>Karel.JS <small>(An HTML5 approach)</small></h1>
       </div>
       <div class="main">
-        <div class="code component">
+        <div class="code">
 
         </div>
-        <div class="world component" data-size-x="20" data-size-y="10">
+        <div class="world" data-size-x="20" data-size-y="10">
           <div class="canvas"></div>
           <div class="robot"></div>
         </div>

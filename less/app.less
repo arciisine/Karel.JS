@@ -1,0 +1,72 @@
+@import "mixins.less";
+
+html, body {
+  padding: 0;
+  margin: 0;
+  background: white;
+  height: 100%;
+}
+
+.container {
+  height: 100%;
+}
+
+.header {
+  .component;
+
+  height: 60px;
+  padding: 0 10px;
+  h1 {
+    margin: 0;
+    padding: 0;
+    line-height: 60px;
+  }
+}
+
+.main {
+  height: calc(100% - 60px);
+
+  .code {
+    .panel;
+    width: 500px;
+  }
+
+  .world {
+    .panel;
+    position: relative;
+    width: calc(100% - 500px);
+    transition: all .25s ease-in-out;
+
+    .robot {
+      .square;
+      background: url(/img/robot.png);
+      position: absolute;
+      top: 0;
+      left: 0;
+    }
+
+    .canvas .cell {
+      .square;
+
+      float: left;
+      border: 1px solid #eee;
+
+      &.wall-up {
+        border-top: 1px solid #888;
+      }
+
+      &.wall-down {
+        border-bottom: 1px solid #888;
+      }
+
+      &.wall-left {
+        border-left: 1px solid #888;
+      }
+
+      &.wall-right {
+        border-right: 1px solid #888;
+      }
+
+    }
+  }
+}

@@ -1,0 +1,30 @@
+.clearfix {
+
+  &:before,
+  &:after {
+    content: " ";
+    display: table;
+  }
+  &:after {
+    clear: both;
+  }
+}
+
+.component {
+  box-sizing: border-box;
+  overflow:hidden;
+  margin: 0;
+}
+
+.square {
+  width: 32px;
+  height: 32px;
+  box-sizing: border-box;
+}
+
+.panel {
+  .component;
+  border: 1px solid #ccc;
+  height: 100%;
+  float: left;
+}
