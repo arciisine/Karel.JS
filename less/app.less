@@ -24,7 +24,7 @@ html, body {
 }
 
 .main {
-  height: calc(100% - 60px);
+  height: calc(~"100% - 60px");
 
   .code {
     .panel;
@@ -34,39 +34,52 @@ html, body {
   .world {
     .panel;
     position: relative;
-    width: calc(100% - 500px);
-    transition: all .25s ease-in-out;
+    width: calc(~"100% - 500px");
 
     .robot {
       .square;
+      /*
+        .filter-drop-shadow(0 0px 5px rgba(0,0,0,.5));
+
+        &.moving {
+          .filter-drop-shadow(0 10px 10px rgba(0,0,0,.5)) !important;
+        }
+      */
+
       background: url(/img/robot.png);
       position: absolute;
       top: 0;
       left: 0;
+      transition: all .25s ease-in-out;
     }
 
-    .canvas .cell {
-      .square;
-
-      float: left;
-      border: 1px solid #eee;
-
-      &.wall-up {
-        border-top: 1px solid #888;
+    .canvas {
+      .row {
+        .clearfix;
       }
 
-      &.wall-down {
-        border-bottom: 1px solid #888;
-      }
+      .cell {
+        .square;
 
-      &.wall-left {
-        border-left: 1px solid #888;
-      }
+        float: left;
+        border: 1px solid #eee;
 
-      &.wall-right {
-        border-right: 1px solid #888;
-      }
+        &.wall-up {
+          border-top: 1px solid #888;
+        }
 
+        &.wall-down {
+          border-bottom: 1px solid #888;
+        }
+
+        &.wall-left {
+          border-left: 1px solid #888;
+        }
+
+        &.wall-right {
+          border-right: 1px solid #888;
+        }
+      }
     }
   }
 }

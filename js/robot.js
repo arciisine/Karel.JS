@@ -48,21 +48,26 @@ define(['constants', 'util', 'jquery'], function(CONSTANTS, Util, $) {
       return this.getWorld().hasWall(this.position.x, this.position.y, this.orientation);
     },
     move : function() {
-      if (!this.isBlocked()) {
-        var dir = this.orientation;
-        var tmp = $.extend({}, this.position);
-        Util.change(tmp, dir.axis, dir.delta, this.getWorld().range[dir.axis]);
-        this.setPosition(tmp.x, tmp.y);
+      var moving = !this.isBlocked();
+      if (moving) {
+        var axis = this.orientation.axis;
+        var delta = this.orientation.delta;
+
+        this.setPosition(
+          this.position.x + (axis === 'x' ? delta : 0),
+          this.position.y + (axis === 'y' ? delta : 0));
       }
+
+      return moving;
     },
     pickupBeeper : function() {
-      if (this.getWorld().updateBeeper(this.toPositionString(), -1)) {
+      if (this.getWorld().getBeeper(this.toPositionString())) {
         Util.change(this, 'beepers', 1);
       }
     },
     dropBeeper : function() {
       if (Util.change(this, 'beepers', -1)) {
-        this.getWorld().updateBeeper(this.toPositionString(), 1);
+        this.getWorld().putBeeper(this.toPositionString());
       }
     },
     toPositionString : function(dir) {

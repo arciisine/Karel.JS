@@ -47,6 +47,12 @@ define(['constants', 'util', 'jquery'], function(CONSTANTS, Util, $) {
       Util.toDefault(this.beepers, position, 0);
       return Util.change(this.beepers, position, delta);
     },
+    getBeeper : function(position) {
+      return this.updateBeeper(position, -1);
+    },
+    putBeeper : function(position) {
+      return this.updateBeeper(position, 1);
+    },
     setWall : function(x, y, dir, st) {
       if (Util.isIn(x, this.range.x) && Util.isIn(y, this.range.y)) {
         var self = this;
@@ -67,7 +73,11 @@ define(['constants', 'util', 'jquery'], function(CONSTANTS, Util, $) {
       }
     },
     hasWall : function(x, y, dir) {
-      return this.walls[Util.positionString(x,y,dir.key)] === true;
+      return this.walls[Util.positionString(x,y,dir.key)] === true
+        || x >= this.range.x[1] - 1 && dir.name == 'right'
+        || x <= this.range.x[0] && dir.name == 'left'
+        || y >= this.range.y[1] - 1 && dir.name == 'down'
+        || y <= this.range.y[0] && dir.name == 'up';
     }
   });
 

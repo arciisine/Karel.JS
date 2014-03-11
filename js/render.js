@@ -11,11 +11,12 @@ define(['constants', 'jquery'], function(CONSTANTS, $) {
         'rotate('+data.angle+'deg)'
       ].join(' ');
 
-      var $node = data.node;
-      $node.css('transform', key);
-      $node.css('-webkit-transform', key);
-      $node.on(TRANSITION_EVENTS, function done() {
-        $node.off(TRANSITION_EVENTS, done);
+      data.node.addClass('moving');
+      data.node.css('transform', key);
+      data.node.css('-webkit-transform', key);
+      data.node.on(TRANSITION_EVENTS, function done() {
+        data.node.off(TRANSITION_EVENTS, done);
+        data.node.removeClass('moving');
         if (cb) cb();
       });
     },
