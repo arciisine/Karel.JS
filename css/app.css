@@ -1,0 +1,98 @@
+html, body {
+  padding: 0;
+  margin: 0;
+  background: white;
+  height: 100%;
+}
+
+
+.container:before,
+.container:after,
+.row:before,
+.row:after,
+.clearfix:before,
+.clearfix:after {
+  content: " ";
+  display: table;
+}
+.container:after,
+.row:after,
+.clearfix:after {
+  clear: both;
+}
+
+.container {
+  height: 100%;
+}
+
+.component {
+  box-sizing: border-box;
+  overflow:hidden;
+  margin: 0;
+}
+
+.header {
+  height: 60px;
+  padding: 0 10px;
+}
+
+.header h1 {
+  margin: 0;
+  padding: 0;
+  line-height: 60px;
+}
+
+.main {
+  height: calc(100% - 60px);
+}
+
+.code, .world {
+  border: 1px solid #ccc;
+  height: 100%;
+  float: left;
+}
+
+.code {
+  width: 500px;
+}
+
+.world {
+  position: relative;
+  width: calc(100% - 500px);
+}
+
+.world .canvas .cell,
+.world .robot {
+  width: 32px;
+  height: 32px;
+  box-sizing: border-box;
+}
+
+.world .canvas .cell {
+  float: left;
+  border: 1px solid #eee;
+}
+
+.world .canvas .cell.wall-up {
+  border-top: 1px solid #888;
+}
+
+.world .canvas .cell.wall-down {
+  border-bottom: 1px solid #888;
+}
+
+.world .canvas .cell.wall-left {
+  border-left: 1px solid #888;
+}
+
+.world .canvas .cell.wall-right {
+  border-right: 1px solid #888;
+}
+
+.world .robot {
+  background: url(/img/robot.png);
+  transition: all .25s ease-in-out;
+  position: absolute;
+  top: 0;
+  left: 0;
+}
