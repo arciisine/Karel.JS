@@ -49,26 +49,32 @@ define(['constants', 'util', 'jquery'], function(CONSTANTS, Util, $) {
       if (typeof dir === 'string') {
         dir = CONSTANTS.DIRECTIONS[dir.toUpperCase()];
       }
+
       if (Util.isIn(pos.x, this.range.x) && Util.isIn(pos.y, this.range.y)) {
         var self = this;
-        var positions = [Util.positionString(pos, dir.key)]
-        var tmp = $.extend({}, pos);
-        var dest = $.extend({}, tmp);
-        Util.change(dest, dir.axis, dir.delta, this.range[dir.axis]);
         var flag = st === true;
+        var tmp = $.extend({dir:dir, state:flag}, pos);
+        var dest = $.extend({}, tmp);
+        var positions = [tmp]
+
+        Util.change(dest, dir.axis, dir.delta, this.range[dir.axis]);
 
         //Track otherside of wall (making them 2-sided)
-        if (dest.x !== tmp.x || dest.y !== tmp.y) {
-          positions.push(Util.positionString(dest, dir.inverse));
+        if ((dest.x !== tmp.x || dest.y !== tmp.y)
+          && Util.isIn(dest.x, this.range.x)
+          && Util.isIn(dest.y, this.range.y)
+        ) {
+          positions.push($.extend({}, dest, {dir:dir.inverse}));
         }
 
-        positions.forEach(function(key) {
-          self.walls[key] = flag;
+        positions.forEach(function(obj) {
+          self.walls[Util.positionString(obj, obj.dir)] = flag;
+          self.$node.trigger('wall-updated', obj)
         });
       }
     },
     hasWall : function(pos, dir) {
-      return this.walls[Util.positionString(pos, dir.key)] === true
+      return this.walls[Util.positionString(pos, dir)] === true
         || pos.x >= this.range.x[1] - 1 && dir.name == 'right'
         || pos.x <= this.range.x[0] && dir.name == 'left'
         || pos.y >= this.range.y[1] - 1 && dir.name == 'down'

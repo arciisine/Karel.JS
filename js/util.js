@@ -3,7 +3,7 @@
  */
 define([], function() {
   function positionString(pos, dir) {
-    return '' + pos.x + ',' + pos.y + ',' + (dir === undefined ? '' : dir);
+    return '' + pos.x + ',' + pos.y + ',' + (dir === undefined ? '' : dir.name);
   }
 
   function bound(v, u, l) {
@@ -24,7 +24,7 @@ define([], function() {
   }
 
   function isIn(v, rng) {
-    return v >= rng[0] && v <= rng[1];
+    return v >= rng[0] && v < rng[1];
   }
 
   return {

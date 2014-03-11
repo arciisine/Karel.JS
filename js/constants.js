@@ -20,6 +20,10 @@ define([], function() {
     }
     directions.MAP = map;
     directions.UPPER = upper;
+
+    for (var k in map) {
+      map[k].inverse = map[map[k].inverse];
+    }
   })();
 
   return {

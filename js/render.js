@@ -4,10 +4,13 @@ define(['constants', 'jquery', 'util'], function(CONSTANTS, $, Util) {
   var queue = [];
   var pending = false;
 
+  var $canvas = null;
+
   var sound = {
     denied : '/sound/denied.ogg'
   };
   var beepers = {};
+  var cells = {};
 
   function buildTranslate(data) {
     return 'translate(' + data.x * CONSTANTS.TILE_SIZE + 'px, ' + data.y * CONSTANTS.TILE_SIZE +'px)';
@@ -58,6 +61,15 @@ define(['constants', 'jquery', 'util'], function(CONSTANTS, $, Util) {
     'robot-blocked' : function blocked(robot, cb) {
       playSound('denied', cb);
     },
+    'wall-updated' : function updated(data, cb) {
+      var $cell = $cells[Util.positionString(data)];
+      if (data.state) {
+        $cell.addClass('wall-'+data.dir.name);
+      } else {
+        $cell.removeClass('wall-'+data.dir.name);
+      }
+      cb();
+    },
     'beeper-updated': function updated(data, cb) {
       var pos = Util.positionString(data);
 
@@ -69,7 +81,7 @@ define(['constants', 'jquery', 'util'], function(CONSTANTS, $, Util) {
         beepers[pos] = $('<div/>').addClass('beeper');
         beepers[pos].css('transform', key);
         beepers[pos].css('-webkit-transform', key);
-        data.node.append(beepers[pos]);
+        $canvas.append(beepers[pos]);
       }
       setTimeout(cb, 1);
     },
@@ -78,7 +90,8 @@ define(['constants', 'jquery', 'util'], function(CONSTANTS, $, Util) {
     }
   };
 
-  function drawWorld($canvas, world) {
+  function drawWorld(world) {
+    $cells = {};
     $canvas.empty();
 
     var ry = world.range.y[1];
@@ -88,12 +101,7 @@ define(['constants', 'jquery', 'util'], function(CONSTANTS, $, Util) {
       var $row = $('<div/>').addClass('row');
       for (var x = 0; x < rx; x++) {
         var $cell = $('<div/>').addClass('cell');
-        for (var k in CONSTANTS.DIRECTIONS) {
-          var dir = CONSTANTS.DIRECTIONS[k];
-          if (world.hasWall({x:x, y:y}, dir)) {
-            $cell.addClass('wall-'+dir.name);
-          }
-        }
+        $cells[Util.positionString({x:x, y:y})] = $cell;
         $row.append($cell);
       }
       $canvas.append($row);
@@ -123,11 +131,11 @@ define(['constants', 'jquery', 'util'], function(CONSTANTS, $, Util) {
     }, 1);
   }
 
-  $(function() {
-    initSounds();
-  });
-
   return {
+    init : function(canvas) {
+      $canvas = canvas;
+      initSounds();
+    },
     process : process,
     drawWorld : drawWorld
   };
