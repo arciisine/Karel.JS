@@ -8,7 +8,7 @@ define(['constants', 'util', 'jquery'], function(CONSTANTS, Util, $) {
     this.$node = $bot;
     this.position = {x:0,y:0,angle:0};
     this.orientation = CONSTANTS.DIRECTIONS.UP;
-    this.beepers = 0;
+    this.beepers = 10;
   }
 
   $.extend(Robot.prototype, {
@@ -34,7 +34,10 @@ define(['constants', 'util', 'jquery'], function(CONSTANTS, Util, $) {
       })]);
     },
     isBlocked : function() {
-      return this.world.hasWall(this.position.x, this.position.y, this.orientation);
+      return this.world.hasWall(this.position, this.orientation);
+    },
+    hasBeeper : function() {
+      return this.world.hasBeeper(this.position);
     },
     move : function() {
       var moving = !this.isBlocked();
@@ -53,14 +56,18 @@ define(['constants', 'util', 'jquery'], function(CONSTANTS, Util, $) {
       return moving;
     },
     pickupBeeper : function() {
-      if (this.world.takeBeeper(this.position.x, this.position.y)) {
+      var didPick = this.world.takeBeeper(this.position);
+      if (didPick) {
         Util.change(this, 'beepers', 1);
       }
+      return didPick;
     },
     dropBeeper : function() {
-      if (Util.change(this, 'beepers', -1)) {
-        this.world.putBeeper(this.position.x, this.position.y);
+      var didDrop = Util.change(this, 'beepers', -1);
+      if (didDrop) {
+        this.world.putBeeper(this.position);
       }
+      return didDrop;
     }
   });
 

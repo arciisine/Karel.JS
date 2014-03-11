@@ -8,7 +8,6 @@ define(['constants', 'util', 'jquery'], function(CONSTANTS, Util, $) {
 
     this.$node = $world;
     this.$node.data().world = this;
-    this.$canvas = this.$node.find('.canvas');
 
     this.beepers = {};
     this.walls = {};
@@ -22,16 +21,17 @@ define(['constants', 'util', 'jquery'], function(CONSTANTS, Util, $) {
   };
 
   $.extend(World.prototype, {
-    updateBeeper : function(x, y, delta) {
-      var pos = Util.positionString(x,y);
-      Util.toDefault(this.beepers, pos, 0);
-      var res = Util.change(this.beepers, pos, delta);
+    updateBeeper : function(pos, delta) {
+      var posStr = Util.positionString(pos);
+      Util.toDefault(this.beepers, posStr, 0);
+      var res = Util.change(this.beepers, posStr, delta);
 
       if (res) {
         this.$node.trigger('beeper-updated', [{
-          x : x,
-          y : y,
-          count : this.beepers[position]
+          x : pos.x,
+          y : pos.y,
+          count : this.beepers[posStr],
+          node : this.$node
         }]);
       }
       return res;
@@ -42,18 +42,21 @@ define(['constants', 'util', 'jquery'], function(CONSTANTS, Util, $) {
     putBeeper : function(position) {
       return this.updateBeeper(position, 1);
     },
-    setWall : function(x, y, dir, st) {
-      if (Util.isIn(x, this.range.x) && Util.isIn(y, this.range.y)) {
+    hasBeeper : function(position) {
+      return !!this.beepers[Util.positionString(position)];
+    },
+    setWall : function(pos, dir, st) {
+      if (Util.isIn(pos.x, this.range.x) && Util.isIn(pos.y, this.range.y)) {
         var self = this;
-        var positions = [Util.positionString(x,y,dir.key)]
-        var tmp = {x : x, y : y};
-        var dest = {x : x, y: y}
+        var positions = [Util.positionString(pos, dir.key)]
+        var tmp = $.extend({}, pos);
+        var dest = $.extend({}, tmp);
         Util.change(dest, dir.axis, dir.delta, this.range[dir.axis]);
         var flag = st === true;
 
         //Track otherside of wall (making them 2-sided)
         if (dest.x !== tmp.x || dest.y !== tmp.y) {
-          positions.push(Util.positionString(dest.x, dest.y, dir.inverse));
+          positions.push(Util.positionString(dest, dir.inverse));
         }
 
         positions.forEach(function(key) {
@@ -61,12 +64,12 @@ define(['constants', 'util', 'jquery'], function(CONSTANTS, Util, $) {
         });
       }
     },
-    hasWall : function(x, y, dir) {
-      return this.walls[Util.positionString(x,y,dir.key)] === true
-        || x >= this.range.x[1] - 1 && dir.name == 'right'
-        || x <= this.range.x[0] && dir.name == 'left'
-        || y >= this.range.y[1] - 1 && dir.name == 'down'
-        || y <= this.range.y[0] && dir.name == 'up';
+    hasWall : function(pos, dir) {
+      return this.walls[Util.positionString(pos, dir.key)] === true
+        || pos.x >= this.range.x[1] - 1 && dir.name == 'right'
+        || pos.x <= this.range.x[0] && dir.name == 'left'
+        || pos.y >= this.range.y[1] - 1 && dir.name == 'down'
+        || pos.y <= this.range.y[0] && dir.name == 'up';
     }
   });
 

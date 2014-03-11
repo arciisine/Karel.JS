@@ -2,8 +2,8 @@
  * General Utilities
  */
 define([], function() {
-  function positionString(x, y, dir) {
-    return '' + x + ',' + y + ',' + (dir === undefined ? '' : dir);
+  function positionString(pos, dir) {
+    return '' + pos.x + ',' + pos.y + ',' + (dir === undefined ? '' : dir);
   }
 
   function bound(v, u, l) {

@@ -36,8 +36,14 @@ html, body {
     position: relative;
     width: calc(~"100% - 500px");
 
+    .beeper {
+      .sprite;
+      background: url('/img/beeper.png');
+      z-index: 5;
+    }
+
     .robot {
-      .square;
+      .sprite;
       /*
         .filter-drop-shadow(0 0px 5px rgba(0,0,0,.5));
 
@@ -45,11 +51,8 @@ html, body {
           .filter-drop-shadow(0 10px 10px rgba(0,0,0,.5)) !important;
         }
       */
-
+      z-index: 10;
       background: url(/img/robot.png);
-      position: absolute;
-      top: 0;
-      left: 0;
       transition: all .5s ease-in-out;
     }
 

@@ -1,4 +1,4 @@
-define(['constants', 'jquery'], function(CONSTANTS, $) {
+define(['constants', 'jquery', 'util'], function(CONSTANTS, $, Util) {
 
   var TRANSITION_EVENTS = 'webkitTransitionEnd transitionend';
   var queue = [];
@@ -7,6 +7,11 @@ define(['constants', 'jquery'], function(CONSTANTS, $) {
   var sound = {
     denied : '/sound/denied.ogg'
   };
+  var beepers = {};
+
+  function buildTranslate(data) {
+    return 'translate(' + data.x * CONSTANTS.TILE_SIZE + 'px, ' + data.y * CONSTANTS.TILE_SIZE +'px)';
+  }
 
   function initSounds() {
     for (var k in sound) {
@@ -17,10 +22,12 @@ define(['constants', 'jquery'], function(CONSTANTS, $) {
   }
 
   function moveAndRotate(data, cls, cb) {
-    var key = [
-      'translate(' + data.x * CONSTANTS.TILE_SIZE + 'px, ' + data.y * CONSTANTS.TILE_SIZE +'px)',
-      'rotate(' + data.angle + 'deg)'
-    ].join(' ');
+    var key = [buildTranslate(data)];
+    if (data.hasOwnProperty('angle')) {
+      key.push('rotate(' + data.angle + 'deg)');
+    }
+
+    key = key.join(' ');
 
     data.node.addClass(cls);
     data.node.css('transform', key);
@@ -51,6 +58,21 @@ define(['constants', 'jquery'], function(CONSTANTS, $) {
     'robot-blocked' : function blocked(robot, cb) {
       playSound('denied', cb);
     },
+    'beeper-updated': function updated(data, cb) {
+      var pos = Util.positionString(data);
+
+      if (data.count == 0 && beepers[pos]) {
+        beepers[pos].remove();
+        delete beeper[pos];
+      } else if (data.count && !beepers[pos]) {
+        var key = buildTranslate(data);
+        beepers[pos] = $('<div/>').addClass('beeper');
+        beepers[pos].css('transform', key);
+        beepers[pos].css('-webkit-transform', key);
+        data.node.append(beepers[pos]);
+      }
+      setTimeout(cb, 1);
+    },
     'pause' : function(delay, cb) {
       setTimeout(delay, cb);
     }
@@ -68,7 +90,7 @@ define(['constants', 'jquery'], function(CONSTANTS, $) {
         var $cell = $('<div/>').addClass('cell');
         for (var k in CONSTANTS.DIRECTIONS) {
           var dir = CONSTANTS.DIRECTIONS[k];
-          if (world.hasWall(x, y, dir)) {
+          if (world.hasWall({x:x, y:y}, dir)) {
             $cell.addClass('wall-'+dir.name);
           }
         }
@@ -78,27 +100,30 @@ define(['constants', 'jquery'], function(CONSTANTS, $) {
     }
   }
 
+  function processQueueIterate() {
+    window.requestAnimationFrame(processQueue);
+  }
+
   function processQueue() {
-    if (!pending) {
-      if (queue.length) {
-        pending = true;
-        var top = queue.shift();
-        console.log(top.fn, top.data);
-        top.fn(top.data, function() {
-          pending = false;
-          window.requestAnimationFrame(processQueue);
-        });
-      }
+    if (queue.length) {
+      var top = queue.shift();
+      top.fn(top.data, processQueueIterate);
+    } else {
+      pending = false;
     }
   }
 
   function process(e, data) {
     queue.push({fn:operations[e.type], data:data});
-    window.requestAnimationFrame(processQueue);
+    setTimeout(function() {
+      if (!pending) {
+        pending = true;
+        processQueue();
+      }
+    }, 1);
   }
 
   $(function() {
-    processQueue();
     initSounds();
   });
 
