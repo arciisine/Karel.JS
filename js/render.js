@@ -2,6 +2,7 @@ define(['constants', 'jquery', 'util'], function(CONSTANTS, $, Util) {
 
   var TRANSITION_EVENTS = 'webkitTransitionEnd transitionend';
   var $world = null;
+  var $worldCanvas = null;
   var $robot = null;
   var $beepers = {};
   var $cells = {};
@@ -78,7 +79,7 @@ define(['constants', 'jquery', 'util'], function(CONSTANTS, $, Util) {
         $beepers[pos] = $('<div/>').addClass('beeper');
         $beepers[pos].css('transform', key);
         $beepers[pos].css('-webkit-transform', key);
-        $world.append($beepers[pos]);
+        $worldCanvas.append($beepers[pos]);
       }
       if (cb) cb();
     },
@@ -89,7 +90,7 @@ define(['constants', 'jquery', 'util'], function(CONSTANTS, $, Util) {
 
   function drawWorld(world) {
     $cells = {};
-    $world.empty();
+    $worldCanvas.empty();
 
     var ry = world.range.y[1];
     var rx = world.range.x[1];
@@ -101,7 +102,7 @@ define(['constants', 'jquery', 'util'], function(CONSTANTS, $, Util) {
         $cells[Util.positionString({x:x, y:y})] = $cell;
         $row.append($cell);
       }
-      $world.append($row);
+      $worldCanvas.append($row);
     }
   }
 
@@ -110,9 +111,10 @@ define(['constants', 'jquery', 'util'], function(CONSTANTS, $, Util) {
   }
 
   return {
-    init : function($_world, $_robot) {
+    init : function($_world) {
       $world = $_world;
-      $robot = $_robot;
+      $worldCanvas = $world.find('.canvas');
+      $robot = $world.find('.robot');
       initSounds();
     },
     process : process,

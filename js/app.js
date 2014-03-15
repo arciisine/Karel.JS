@@ -3,10 +3,10 @@ require(['constants', 'jquery', 'robot', 'world', 'executor', 'render'], functio
    * App Class
    */
   function App($root) {
+    var self = this;
 
     this.$root = $root;
-    this.$world = this.$root.find('.canvas');
-    this.$robot = this.$root.find('.robot');
+    this.$world = this.$root.find('.world');
     this.$code = this.$root.find('.code');
     this.$codeText = this.$code.find('textarea');
 
@@ -18,7 +18,10 @@ require(['constants', 'jquery', 'robot', 'world', 'executor', 'render'], functio
     var executor = this.executor = new Executor(robot);
 
 
-    this.$code.find('button[name="compile"]').on('click', executor.compile.bind(executor));
+    this.$code.find('button[name="compile"]').on('click', function() {
+      executor.compile(self.$codeText.val());
+    });
+
     this.$code.find('button[name="start"]').on('click', executor.start.bind(executor));
     this.$code.find('button[name="pause"]').on('click', executor.pause.bind(executor));
     this.$code.find('button[name="stop"]').on('click', executor.stop.bind(executor));
@@ -26,7 +29,7 @@ require(['constants', 'jquery', 'robot', 'world', 'executor', 'render'], functio
 
   $.extend(App.prototype, {
     init : function(cb) {
-      Render.init(this.$robot, this.$world);
+      Render.init(this.$world);
       Render.drawWorld(this.world);
       cb();
     }
@@ -44,7 +47,7 @@ require(['constants', 'jquery', 'robot', 'world', 'executor', 'render'], functio
         y : Math.floor(Math.random() * karel.world.range.y[1])
       }, CONSTANTS.DIRECTIONS.MAP[Math.floor(Math.random() * 4)], true);
 
-      setWalls.forEach(updateWall);
+      setWalls.forEach(function(obj) { updateWall(obj); });
     }
   });
 });

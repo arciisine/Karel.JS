@@ -8,8 +8,8 @@ define(['constants', 'util', 'jquery'], function(CONSTANTS, Util, $) {
     this.walls = {};
 
     this.range = {
-      x : [0, x],
-      y : [0, y]
+      x : [0, parseInt(x)],
+      y : [0, parseInt(y)]
     };
   }
 
