@@ -1,13 +1,18 @@
-require(['constants', 'jquery', 'robot', 'world', 'render', 'executor'], function(CONSTANTS, $, Robot, World, Render) {
+require(['constants', 'jquery', 'robot', 'world', 'executor', 'render'], function(CONSTANTS, $, Robot, World, Executor, Render) {
   /**
    * App Class
    */
   function App($root) {
+    var self = this;
     this.$root = $root;
+    this.executor = new Executor($root.find('.code'));
     this.world = new World($root.find('.world'));
     this.robot = new Robot(this.world, $root.find('.robot'));
     this.$canvas = $root.find('.canvas');
     this.$root.on('robot-move robot-rotate robot-blocked beeper-updated wall-updated', Render.process);
+    this.$root.on('execute', function(e, fn) {
+      fn(self.robot);
+    })
   }
 
   $.extend(App.prototype, {

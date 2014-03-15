@@ -8,7 +8,7 @@
   },
   "devDependencies": {},
   "scripts": {
-    "generate" : "mkdir -p generated; node node_modules/jison/lib/cli.js lexer/karel-lang.jison -o generated/karel-lang.js",
+    "generate" : "mkdir -p generated; node node_modules/jison/lib/cli.js lexer/karel-lang.jison -m amd -o generated/karel-lang.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {

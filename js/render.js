@@ -120,28 +120,23 @@ define(['constants', 'jquery', 'util'], function(CONSTANTS, $, Util) {
   function processQueue() {
     if (queue.length) {
       var top = queue.shift();
-      if (ready) {
-        top.fn(top.data, processQueueIterate);
-      } else {
-        top.fn(top.data, identity);
-        processQueue();
-      }
+      top.fn(top.data, processQueueIterate);
     } else {
       pending = false;
     }
   }
 
   function process(e, data) {
-    queue.push({fn:operations[e.type], data:data});
-    if (ready) {
+    if (!ready) { //Run immediately if in setup
+      operations[e.type](data, identity);
+    } else {
+      queue.push({fn:operations[e.type], data:data});
       setTimeout(function() {
         if (!pending) {
           pending = true;
           processQueue();
         }
       }, 1);
-    } else {
-      processQueue();
     }
   }
 
@@ -152,9 +147,7 @@ define(['constants', 'jquery', 'util'], function(CONSTANTS, $, Util) {
       initSounds();
     },
     ready : function() {
-      setTimeout(function() {
-        ready = true;
-      }, 1);
+      ready = true;
     },
     process : process,
     drawWorld : drawWorld
