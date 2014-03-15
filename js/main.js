@@ -9,7 +9,8 @@ require.config({
     // is using jQuery 1.9.0 located at
     // js/lib/jquery-1.9.0.js, relative to
     // the HTML page.
-    jquery: '/bower_components/jquery/dist/jquery.min'
+    jquery: '/bower_components/jquery/dist/jquery.min',
+    lexer : '/generated/karel-lang'
   }
 });
 

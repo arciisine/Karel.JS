@@ -3,6 +3,7 @@ define(['constants', 'jquery', 'util'], function(CONSTANTS, $, Util) {
   var TRANSITION_EVENTS = 'webkitTransitionEnd transitionend';
   var queue = [];
   var pending = false;
+  var ready = false;
 
   var $canvas = null;
 
@@ -11,6 +12,10 @@ define(['constants', 'jquery', 'util'], function(CONSTANTS, $, Util) {
   };
   var beepers = {};
   var cells = {};
+
+  function identity() {
+    return arguments;
+  }
 
   function buildTranslate(data) {
     return 'translate(' + data.x * CONSTANTS.TILE_SIZE + 'px, ' + data.y * CONSTANTS.TILE_SIZE +'px)';
@@ -115,7 +120,12 @@ define(['constants', 'jquery', 'util'], function(CONSTANTS, $, Util) {
   function processQueue() {
     if (queue.length) {
       var top = queue.shift();
-      top.fn(top.data, processQueueIterate);
+      if (ready) {
+        top.fn(top.data, processQueueIterate);
+      } else {
+        top.fn(top.data, identity);
+        processQueue();
+      }
     } else {
       pending = false;
     }
@@ -123,18 +133,28 @@ define(['constants', 'jquery', 'util'], function(CONSTANTS, $, Util) {
 
   function process(e, data) {
     queue.push({fn:operations[e.type], data:data});
-    setTimeout(function() {
-      if (!pending) {
-        pending = true;
-        processQueue();
-      }
-    }, 1);
+    if (ready) {
+      setTimeout(function() {
+        if (!pending) {
+          pending = true;
+          processQueue();
+        }
+      }, 1);
+    } else {
+      processQueue();
+    }
   }
 
   return {
     init : function(canvas) {
+      ready = false;
       $canvas = canvas;
       initSounds();
+    },
+    ready : function() {
+      setTimeout(function() {
+        ready = true;
+      }, 1);
     },
     process : process,
     drawWorld : drawWorld

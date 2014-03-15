@@ -4,13 +4,12 @@
 define(['constants', 'util', 'jquery'], function(CONSTANTS, Util, $) {
 
   function World($world, x, y) {
-    var self = this;
-
     this.$node = $world;
     this.$node.data().world = this;
 
     this.beepers = {};
     this.walls = {};
+
     x = x || this.$node.data().sizeX;
     y = y || this.$node.data().sizeY;
 
@@ -18,7 +17,7 @@ define(['constants', 'util', 'jquery'], function(CONSTANTS, Util, $) {
       x : [0, x],
       y : [0, y]
     };
-  };
+  }
 
   $.extend(World.prototype, {
     updateBeeper : function(pos, delta) {

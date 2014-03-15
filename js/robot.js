@@ -62,7 +62,7 @@ define(['constants', 'util', 'jquery'], function(CONSTANTS, Util, $) {
       }
       return didPick;
     },
-    dropBeeper : function() {
+    putBeeper : function() {
       var didDrop = Util.change(this, 'beepers', -1);
       if (didDrop) {
         this.world.putBeeper(this.position);
