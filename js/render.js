@@ -10,7 +10,11 @@ define(['constants', 'jquery', 'util'], function(CONSTANTS, $, Util) {
     denied : '/sound/denied.ogg'
   };
 
-  function initSounds() {
+  function init($_world) {
+    $world = $_world;
+    $worldCanvas = $_world.find('.canvas');
+    $robot = $_world.find('.robot');
+
     for (var k in sound) {
       var url = sound[k];
       sound[k] = new Audio(url);
@@ -111,12 +115,7 @@ define(['constants', 'jquery', 'util'], function(CONSTANTS, $, Util) {
   }
 
   return {
-    init : function($_world) {
-      $world = $_world;
-      $worldCanvas = $world.find('.canvas');
-      $robot = $world.find('.robot');
-      initSounds();
-    },
+    init : init,
     process : process,
     drawWorld : drawWorld
   };

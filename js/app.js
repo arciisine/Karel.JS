@@ -3,8 +3,6 @@ require(['constants', 'jquery', 'robot', 'world', 'executor', 'render'], functio
    * App Class
    */
   function App($root) {
-    var self = this;
-
     this.$root = $root;
     this.$world = this.$root.find('.world');
     this.$code = this.$root.find('.code');
@@ -13,25 +11,31 @@ require(['constants', 'jquery', 'robot', 'world', 'executor', 'render'], functio
     var x = this.$world.data().sizeX;
     var y = this.$world.data().sizeY;
 
-    var world = this.world = new World(x,y);
-    var robot = this.robot = new Robot(world);
-    var executor = this.executor = new Executor(robot);
-
-
-    this.$code.find('button[name="compile"]').on('click', function() {
-      executor.compile(self.$codeText.val());
-    });
-
-    this.$code.find('button[name="start"]').on('click', executor.start.bind(executor));
-    this.$code.find('button[name="pause"]').on('click', executor.pause.bind(executor));
-    this.$code.find('button[name="stop"]').on('click', executor.stop.bind(executor));
+    this.world = new World(x,y);
+    this.robot = new Robot(this.world);
+    this.executor = new Executor(this.robot);
   }
 
   $.extend(App.prototype, {
+    bindUI : function() {
+      var self = this;
+
+      var executor = this.executor;
+
+      this.$code.find('button[name="compile"]').on('click', function() {
+        executor.compile(self.$codeText.val());
+      });
+
+      this.$code.find('button[name="start"]').on('click', executor.start.bind(executor));
+      this.$code.find('button[name="pause"]').on('click', executor.pause.bind(executor));
+      this.$code.find('button[name="stop"]').on('click', executor.stop.bind(executor));
+
+    },
     init : function(cb) {
       Render.init(this.$world);
       Render.drawWorld(this.world);
-      cb();
+      this.bindUI();
+      cb.call(this);
     }
   });
 
@@ -42,9 +46,9 @@ require(['constants', 'jquery', 'robot', 'world', 'executor', 'render'], functio
     var updateWall = Render.process.bind(Render, 'wall-updated');
 
     for (var i = 0; i < 100; i++) {
-      var setWalls = karel.world.setWall({
-        x : Math.floor(Math.random() * karel.world.range.x[1]),
-        y : Math.floor(Math.random() * karel.world.range.y[1])
+      var setWalls = this.world.setWall({
+        x : Math.floor(Math.random() * this.world.range.x[1]),
+        y : Math.floor(Math.random() * this.world.range.y[1])
       }, CONSTANTS.DIRECTIONS.MAP[Math.floor(Math.random() * 4)], true);
 
       setWalls.forEach(function(obj) { updateWall(obj); });

@@ -1,6 +1,6 @@
-define(['lexer', 'jquery', 'Render'], function(lexer, $, Render) {
+define(['lexer', 'jquery', 'render'], function(lexer, $, Render) {
 
-  function Executor(world, robot) {
+  function Executor(robot) {
     this.stack = [];
     this.pending = [];
     this.position = 0;
@@ -43,24 +43,9 @@ define(['lexer', 'jquery', 'Render'], function(lexer, $, Render) {
       var code = lexer.parse(text);
       this.__compiled = new Function('enqueue', 'exports', code);
     },
-    iterate : function() {
-
-      if (!this.running || this.paused) {
-        return false;
-      }
-
-      if (!this.stack.length) {
-        this.running = false;
-        return false;
-      }
-
-      var command = this.stack.shift();
-
-      this.pending = [];
-
+    __processCommand : function(command) {
       var cmd = command[0];
-
-      var again = this.iterate.bind(this);
+      var renderCommand = null;
 
       if (cmd in this.__userOperations) { //If custom op
         this.__userOperations[cmd]();
@@ -68,24 +53,23 @@ define(['lexer', 'jquery', 'Render'], function(lexer, $, Render) {
         switch (cmd) {
         case 'turnLeft':
           this.robot.turnLeft();
-          Render.process('robot-rotate', this.robot.position, again);
+          renderCommand = ['robot-rotate', this.robot.position];
           break;
         case 'move':
           if (this.robot.move()) {
-            Render.process('robot-move', this.robot.position, again);
+            renderCommand = ['robot-move', this.robot.position];
           } else {
-            Render.process('robot-blocked', null, again);
+            renderCommand = ['robot-blocked'];
           }
           break;
         case 'putBeeper':
         case 'pickBeeper':
           if (this.robot[cmd]()) {
-            Render.process('beeper-updated');
-            Render.process('beeper-updated', $.extend({}, robot.position, {
+            renderCommand = ['beeper-updated', $.extend({}, robot.position, {
               count : robot.countBeeper()
-            }), again);
+            })];
           } else {
-            Render.process('beeper-failed', null, again);
+            renderCommand = ['beeper-failed'];
           }
           break;
         case 'if':
@@ -104,6 +88,37 @@ define(['lexer', 'jquery', 'Render'], function(lexer, $, Render) {
         default:
           throw new Error("unknown operation: " + cmd);
         }
+      }
+
+      return renderCommand;
+    },
+    iterate : function(cb) {
+
+      if (!this.running || this.paused || !this.stack.length) {
+        return this.stack.length;
+      }
+
+      this.pending = [];
+
+      var self = this;
+      var callback = function() {
+        if (cb) {
+          //Indicate if there are more
+          self.running = stack.length > 0;
+          cb(self.running);
+        } else {
+          //Do nothing
+        }
+      }
+
+      var renderCommand = this.__processCommand(this.stack.shift());
+
+      if (renderCommand) {
+        renderCommand[2] = callback;
+        Render.process.apply(null, renderCommand);
+      } else {
+        //Call immediately
+        setTimeout(callback, 1);
       }
 
       //Allows us to override queue w/ recently gathered items

@@ -4,24 +4,16 @@ function turnRight() {
   turnLeft();
 }
 
-function turnAround() {
-  turnLeft();
-  turnLeft();
-}
-
-function moveBack() {
-  turnAround();
+function moveTwice() {
   move();
-  turnAround();
+  move();
 }
 
-function moveOrTurn() {
-  if (isBlocked()) {
-    turnLeft();
-  } else {
-    move();
-  }
+function weird() {
+  turnRight();
+  move();
+  turnRight();
+  moveTwice();
 }
 
-turnLeft();
-moveOrTurn();
+weird();
