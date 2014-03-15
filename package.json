@@ -1,0 +1,23 @@
+{
+  "name": "Karel.js",
+  "version": "0.0.0",
+  "description": "",
+  "main": "index.js",
+  "dependencies": {
+    "jison": "~0.4.13"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/timothysoehnlin/Karel.JS.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/timothysoehnlin/Karel.JS/issues"
+  },
+  "homepage": "https://github.com/timothysoehnlin/Karel.JS"
+}
