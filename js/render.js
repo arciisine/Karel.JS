@@ -1,25 +1,13 @@
 define(['constants', 'jquery', 'util'], function(CONSTANTS, $, Util) {
 
   var TRANSITION_EVENTS = 'webkitTransitionEnd transitionend';
-  var queue = [];
-  var pending = false;
-  var ready = false;
-
-  var $canvas = null;
-
+  var $world = null;
+  var $robot = null;
+  var $beepers = {};
+  var $cells = {};
   var sound = {
     denied : '/sound/denied.ogg'
   };
-  var beepers = {};
-  var cells = {};
-
-  function identity() {
-    return arguments;
-  }
-
-  function buildTranslate(data) {
-    return 'translate(' + data.x * CONSTANTS.TILE_SIZE + 'px, ' + data.y * CONSTANTS.TILE_SIZE +'px)';
-  }
 
   function initSounds() {
     for (var k in sound) {
@@ -29,7 +17,11 @@ define(['constants', 'jquery', 'util'], function(CONSTANTS, $, Util) {
     }
   }
 
-  function moveAndRotate(data, cls, cb) {
+  function buildTranslate(data) {
+    return 'translate(' + data.x * CONSTANTS.TILE_SIZE + 'px, ' + data.y * CONSTANTS.TILE_SIZE +'px)';
+  }
+
+  function moveAndRotate($node, data, cls, cb) {
     var key = [buildTranslate(data)];
     if (data.hasOwnProperty('angle')) {
       key.push('rotate(' + data.angle + 'deg)');
@@ -37,12 +29,12 @@ define(['constants', 'jquery', 'util'], function(CONSTANTS, $, Util) {
 
     key = key.join(' ');
 
-    data.node.addClass(cls);
-    data.node.css('transform', key);
-    data.node.css('-webkit-transform', key);
-    data.node.on(TRANSITION_EVENTS, function done() {
-      data.node.off(TRANSITION_EVENTS, done);
-      data.node.removeClass(cls);
+    $node.addClass(cls);
+    $node.css('transform', key);
+    $node.css('-webkit-transform', key);
+    $node.on(TRANSITION_EVENTS, function done() {
+      $node.off(TRANSITION_EVENTS, done);
+      $node.removeClass(cls);
       if (cb) cb();
     });
   }
@@ -58,10 +50,10 @@ define(['constants', 'jquery', 'util'], function(CONSTANTS, $, Util) {
 
   var operations = {
     'robot-move' : function move(data, cb) {
-      moveAndRotate(data, 'moving', cb);
+      moveAndRotate($robot, data, 'moving', cb);
     },
     'robot-rotate' : function rotate(data, cb) {
-      moveAndRotate(data, 'rotating', cb);
+      moveAndRotate($robot, data, 'rotating', cb);
     },
     'robot-blocked' : function blocked(robot, cb) {
       playSound('denied', cb);
@@ -73,22 +65,22 @@ define(['constants', 'jquery', 'util'], function(CONSTANTS, $, Util) {
       } else {
         $cell.removeClass('wall-'+data.dir.name);
       }
-      cb();
+      if (cb) cb();
     },
     'beeper-updated': function updated(data, cb) {
       var pos = Util.positionString(data);
 
-      if (data.count == 0 && beepers[pos]) {
-        beepers[pos].remove();
-        delete beeper[pos];
-      } else if (data.count && !beepers[pos]) {
+      if (data.count == 0 && $beepers[pos]) {
+        $beepers[pos].remove();
+        delete $beepers[pos];
+      } else if (data.count && !$beepers[pos]) {
         var key = buildTranslate(data);
-        beepers[pos] = $('<div/>').addClass('beeper');
-        beepers[pos].css('transform', key);
-        beepers[pos].css('-webkit-transform', key);
-        $canvas.append(beepers[pos]);
+        $beepers[pos] = $('<div/>').addClass('beeper');
+        $beepers[pos].css('transform', key);
+        $beepers[pos].css('-webkit-transform', key);
+        $world.append($beepers[pos]);
       }
-      setTimeout(cb, 1);
+      if (cb) cb();
     },
     'pause' : function(delay, cb) {
       setTimeout(delay, cb);
@@ -97,7 +89,7 @@ define(['constants', 'jquery', 'util'], function(CONSTANTS, $, Util) {
 
   function drawWorld(world) {
     $cells = {};
-    $canvas.empty();
+    $world.empty();
 
     var ry = world.range.y[1];
     var rx = world.range.x[1];
@@ -109,45 +101,19 @@ define(['constants', 'jquery', 'util'], function(CONSTANTS, $, Util) {
         $cells[Util.positionString({x:x, y:y})] = $cell;
         $row.append($cell);
       }
-      $canvas.append($row);
+      $world.append($row);
     }
   }
 
-  function processQueueIterate() {
-    window.requestAnimationFrame(processQueue);
-  }
-
-  function processQueue() {
-    if (queue.length) {
-      var top = queue.shift();
-      top.fn(top.data, processQueueIterate);
-    } else {
-      pending = false;
-    }
-  }
-
-  function process(e, data) {
-    if (!ready) { //Run immediately if in setup
-      operations[e.type](data, identity);
-    } else {
-      queue.push({fn:operations[e.type], data:data});
-      setTimeout(function() {
-        if (!pending) {
-          pending = true;
-          processQueue();
-        }
-      }, 1);
-    }
+  function process(op, data, done) {
+    operations[op](data, done);
   }
 
   return {
-    init : function(canvas) {
-      ready = false;
-      $canvas = canvas;
+    init : function($_world, $_robot) {
+      $world = $_world;
+      $robot = $_robot;
       initSounds();
-    },
-    ready : function() {
-      ready = true;
     },
     process : process,
     drawWorld : drawWorld

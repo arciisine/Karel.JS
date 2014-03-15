@@ -45,7 +45,7 @@ FUNCTIONS
 
 FUNCTION_EXPR
             : FUNCTION SYMBOL '(' ')' '{' COMMANDS '}'
-                { $$ = 'function ' + $2 + '() {\n' + $6 + '\n}'; }
+                { $$ = 'exports.'+$2+' = function ' + $2 + '() {\n' + $6 + '\n};'; }
             ;
 
 BOOL_COMMANDS
@@ -75,20 +75,22 @@ COMMANDS
             ;
 
 COMMAND
-            : LEFT ';'
-                { $$ = "robot.turnLeft();"; }
-            | MOVE ';'
-                { $$ = "robot.move();"; }
-            | PUT_BEEPER ';'
-                { $$ = "robot.putBeeper();"; }
-            | PICK_BEEPER ';'
-                { $$ = "robot.pickBeeper();"; }
-            | SYMBOL '(' ')' ';'
-                { $$ = $1 + '();' }
+            : COMMAND ';'
+                { $$ = $1; }
+            | LEFT
+                { $$ = "enqueue('turnLeft');"; }
+            | MOVE
+                { $$ = "enqueue('move');"; }
+            | PUT_BEEPER
+                { $$ = "enqueue('putBeeper');"; }
+            | PICK_BEEPER
+                { $$ = "enqueue('pickBeeper');"; }
+            | SYMBOL '(' ')'
+                { $$ = "enqueue('"+$1+"');"; }
             | WHILE '(' BOOL_COMMANDS ')' '{' COMMANDS '}'
-                { $$ = "while (\n" + $3 + ") {\n" + $6 + "\n}"; }
+                { $$ = "enqueue('while', function(robot) {\n return " + $3 + "\n}, function() {\n" + $6 + "\n});"; }
             | IF '(' BOOL_COMMANDS ')' '{' COMMANDS '}' ELSE '{' COMMANDS '}'
-                { $$ = "if (" + $3 + ") {\n" + $6 + "\n} else {\n" + $10 + "\n}"; }
+                { $$ = "enqueue('if', function(robot) {\n return " + $3 + "\n}, function() {\n" + $6 + "\n}, function() {\n" + $10 +"\n});"; }
             | IF '(' BOOL_COMMANDS ')' '{' COMMANDS '}'
-                { $$ = "if (" + $3 + ") {\n" + $6 + "\n}"; }
+                { $$ = "enqueue('if', function(robot) {\n return " + $3 + "\n}, function() {\n" + $6 + "\n})"; }
             ;

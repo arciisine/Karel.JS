@@ -3,35 +3,48 @@ require(['constants', 'jquery', 'robot', 'world', 'executor', 'render'], functio
    * App Class
    */
   function App($root) {
-    var self = this;
+
     this.$root = $root;
-    this.executor = new Executor($root.find('.code'));
-    this.world = new World($root.find('.world'));
-    this.robot = new Robot(this.world, $root.find('.robot'));
-    this.$canvas = $root.find('.canvas');
-    this.$root.on('robot-move robot-rotate robot-blocked beeper-updated wall-updated', Render.process);
-    this.$root.on('execute', function(e, fn) {
-      fn(self.robot);
-    })
+    this.$world = this.$root.find('.canvas');
+    this.$robot = this.$root.find('.robot');
+    this.$code = this.$root.find('.code');
+    this.$codeText = this.$code.find('textarea');
+
+    var x = this.$world.data().sizeX;
+    var y = this.$world.data().sizeY;
+
+    var world = this.world = new World(x,y);
+    var robot = this.robot = new Robot(world);
+    var executor = this.executor = new Executor(robot);
+
+
+    this.$code.find('button[name="compile"]').on('click', executor.compile.bind(executor));
+    this.$code.find('button[name="start"]').on('click', executor.start.bind(executor));
+    this.$code.find('button[name="pause"]').on('click', executor.pause.bind(executor));
+    this.$code.find('button[name="stop"]').on('click', executor.stop.bind(executor));
   }
 
   $.extend(App.prototype, {
     init : function(cb) {
-      Render.init(this.$canvas);
+      Render.init(this.$robot, this.$world);
       Render.drawWorld(this.world);
-      cb(Render.ready);
+      cb();
     }
   });
 
   var karel = window.karel = new App($('body'));
 
-  karel.init(function(cb) {
+  karel.init(function() {
+
+    var updateWall = Render.process.bind(Render, 'wall-updated');
+
     for (var i = 0; i < 100; i++) {
-      karel.world.setWall({
+      var setWalls = karel.world.setWall({
         x : Math.floor(Math.random() * karel.world.range.x[1]),
         y : Math.floor(Math.random() * karel.world.range.y[1])
       }, CONSTANTS.DIRECTIONS.MAP[Math.floor(Math.random() * 4)], true);
+
+      setWalls.forEach(updateWall);
     }
-    cb();
   });
 });
