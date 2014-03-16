@@ -4,16 +4,17 @@ function turnRight() {
   turnLeft();
 }
 
-function moveTwice() {
-  move();
-  move();
+function moveN(n) {
+  if (n > 0) {
+    moveN(n - 1);
+  }
 }
 
 function weird() {
   turnRight();
   move();
   turnRight();
-  moveTwice();
+  moveN(2);
 }
 
 weird();
